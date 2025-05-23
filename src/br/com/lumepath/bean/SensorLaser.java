@@ -3,7 +3,6 @@ package br.com.lumepath.bean;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.random.RandomGenerator;
 
 /**
  * Implementação concreta da interface {@link Sensor} para sensores baseados em tecnologia laser.
@@ -17,10 +16,13 @@ public class SensorLaser implements Sensor {
     private String portaSerial;
     private double velocidadeAtualDoSlider;
     private boolean detectando = false;
-    private double precisao;
     private boolean calibrado = false;
     private boolean ativo = false;
-    private LocalDateTime ultimaLeitura;
+    /**
+     * O uso do ArrayList é essencial para armazenar as diversas medições realizadas pelo   sensor durante o processo de detecção.
+     * Como o sensor realiza medições contínuas e dinâmicas ao longo do tempo, a quantidade de dados não é conhecida previamente, variando conforme o contexto de uso.
+     * O array list também conta com o metodo size, que é crucial para tornar o calculo do tamanho da amostra dinâmico, entrando como o Δd na fórmula S = v * Δd.
+     * */
     private final List<Double> dadosAltura = new ArrayList<>();
     private final List<Double> dadosProfundidade = new ArrayList<>();
     private final List<Double> dadosComprimento = new ArrayList<>();
@@ -54,6 +56,8 @@ public class SensorLaser implements Sensor {
     /**
      * Define a porta serial utilizada pelo sensor.
      *
+     * O metodo isEmpty() é utilizado para verificar se a string representando a porta serial é vazia.
+     *
      * @param portaSerial a nova porta serial.
      * @throws IllegalArgumentException se a porta for nula, vazia ou estiver em formato inválido.
      */
@@ -65,14 +69,6 @@ public class SensorLaser implements Sensor {
             throw new IllegalArgumentException("Formato de porta serial inválido: " + portaSerial);
         }
         this.portaSerial = portaSerial;
-    }
-
-    public LocalDateTime getUltimaLeitura() {
-        return ultimaLeitura;
-    }
-
-    public void setUltimaLeitura() {
-        this.ultimaLeitura = LocalDateTime.now();
     }
 
     public boolean isAtivo() {
@@ -95,10 +91,6 @@ public class SensorLaser implements Sensor {
         return calibrado;
     }
 
-    public double getPrecisao() {
-        return precisao;
-    }
-
     @Override
     public void iniciar() {
         setAtivo(true);
@@ -106,7 +98,11 @@ public class SensorLaser implements Sensor {
 
     @Override
     public double lerDados() {
-        return detectando ? 1.0 : 0.0;
+        if (!detectando) {
+            return 0.0;
+        } else {
+            return 1;
+        }
     }
 
     /**
@@ -124,8 +120,13 @@ public class SensorLaser implements Sensor {
         }
     }
 
+    @Override
+    public void armazenarDado(Double dado) {
+
+    }
+
     /**
-     * Reseta o sensor: limpa dados, desativa e reativa após breve intervalo.
+     * Reseta o sensor: limpa dados, desativa e reativa.
      */
     @Override
     public void reset() {
@@ -134,16 +135,13 @@ public class SensorLaser implements Sensor {
         dadosAltura.clear();
         calibrado = false;
         setAtivo(false);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
         setAtivo(true);
     }
 
     /**
      * Realiza o cálculo de uma medida com base nos dados armazenados e na velocidade do slider.
+     *
+     * O metodo isEmpty() é utilizado para garantir a segurança na operação de cálculo,     prevenindo a realização de operações aritméticas ou lógicas sobre listas vazias, o que poderia gerar resultados incorretos ou até exceções.
      *
      * @param tipoDeMedida "altura", "comprimento" ou "profundidade".
      * @param amostra objeto {@link Amostra} onde o resultado será armazenado.
@@ -180,7 +178,6 @@ public class SensorLaser implements Sensor {
 
     @Override
     public void encerrar() {
-        setUltimaLeitura();
         setAtivo(false);
     }
 
@@ -200,12 +197,12 @@ public class SensorLaser implements Sensor {
      * Obtém a velocidade atual do slider.
      *
      * @return velocidade em metros por segundo (m/s);
-     * se não calibrado, retorna valor aleatório para simulação.
+     * Retorna zero caso não esteja calibrado por motivos de simulação, futuramente virá da porta serial.
      */
     @Override
     public double getVelocidadeAtualDoSlider() {
         if (!isCalibrado()) {
-            return RandomGenerator.getDefault().nextDouble();
+            return 0;
         }
         return velocidadeAtualDoSlider;
     }

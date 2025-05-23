@@ -6,8 +6,7 @@ import java.util.List;
  * Interface que define os comportamentos esperados de um sensor genérico.
  *
  * <p>Essa interface pode ser implementada por sensores de diferentes tipos,
- * como sensores de distância (LIDAR, ultrassônicos), câmeras com visão computacional,
- * sensores de temperatura, entre outros.</p>
+ * como sensores de distância (Laser, ultrassônicos), câmeras com visão computacional, entre outros.</p>
  *
  * <p>Ela define métodos essenciais para o ciclo de vida do sensor,
  * bem como para leitura, calibração, armazenamento e cálculo de dados.</p>
@@ -16,7 +15,7 @@ import java.util.List;
  * armazenamento das leituras e, posteriormente, cálculos sobre os dados obtidos.</p>
  *
  * @author Ricardo
- * @version 1.1
+ * @version 1.2
  */
 public interface Sensor {
 
@@ -39,6 +38,8 @@ public interface Sensor {
      * @param lista a lista onde os dados brutos devem ser armazenados.
      */
     void armazenarDado(List<Double> lista);
+
+    void armazenarDado(Double dado);
 
     /**
      * Reseta o estado interno do sensor para sua configuração inicial.
