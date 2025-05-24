@@ -106,7 +106,7 @@ public class SensorLaser implements Sensor {
     public void iniciar(Leitor leitor) {
         setAtivo();
         try {
-            int alturaTesteAmostra=Integer.parseInt(JOptionPane.showInputDialog("Digite o altura da amostra: "));
+            int alturaTesteAmostra=Integer.parseInt(JOptionPane.showInputDialog("Digite a altura da amostra: "));
             leitor.setDetectando();
             for (int i = 0; i < alturaTesteAmostra; i++) {
                 armazenarDado(dadosAltura,leitor);

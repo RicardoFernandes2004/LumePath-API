@@ -1,11 +1,13 @@
 package br.com.lumepath.bean;
 
+import javax.swing.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Leitor implements Leitura{
-    private Sensor sensor;
+    private final Sensor sensor;
+    private final Amostra amostra;
     private double precisao;
     private LocalDateTime ultimaLeitura;
     private boolean detectando = false;
@@ -14,6 +16,20 @@ public class Leitor implements Leitura{
     private final List<Double> dadosAltura = new ArrayList<>();
     private double leituraCameraAltura;
     private double leituraCameraComprimento;
+
+    public Leitor(Sensor sensor, Amostra amostra) {
+        this.sensor = sensor;
+        this.amostra = amostra;
+    }
+
+
+    public LocalDateTime getUltimaLeitura() {
+        return ultimaLeitura;
+    }
+
+    public void setUltimaLeitura() {
+        this.ultimaLeitura = LocalDateTime.now();
+    }
 
     public boolean isDetectando() {
         return detectando;
@@ -63,6 +79,29 @@ public class Leitor implements Leitura{
         this.dadosProfundidade.add(Profundidade);
     }
 
+    public void calcPrecisao() {
+        double medidaAltura = sensor.getVelocidadeAtualDoSlider() * (dadosAltura.size() - 1);
+        double medidaComprimento = sensor.getVelocidadeAtualDoSlider() * (dadosComprimento.size() - 1);
+
+        // Calcula o erro
+        double erroAltura = leituraCameraAltura - medidaAltura;
+        if (erroAltura < 0) {
+            erroAltura = -erroAltura;
+        }
+
+        double erroComprimento = leituraCameraComprimento - medidaComprimento;
+        if (erroComprimento < 0) {
+            erroComprimento = -erroComprimento;
+        }
+
+        // Faz a média dos erros
+        this.precisao = (erroAltura + erroComprimento) / 2;
+    }
+
+    public double getPrecisao() {
+        return precisao;
+    }
+
     /**
      * Realiza o cálculo de uma medida com base nos dados armazenados e na velocidade do slider.
      * O metodo isEmpty() é utilizado para garantir a segurança na operação de cálculo,     prevenindo a realização de operações aritméticas ou lógicas sobre listas vazias, o que poderia gerar resultados incorretos ou até exceções.
@@ -102,14 +141,18 @@ public class Leitor implements Leitura{
 
     @Override
     public void lerSensor(Sensor sensor) {
-
-
+    sensor.iniciar(this);
+    sensor.encerrar();
+    calcPrecisao();
+    enviarDadosAmostra(amostra);
+    JOptionPane.showMessageDialog(null,String.format("Precisão da medição: %.2f", getPrecisao()));
+    setUltimaLeitura();
     }
 
-    @Override
-    public void armazenarDado() {
-
-
-
+    public void enviarDadosAmostra(Amostra amostra) {
+        calcular("altura", amostra);
+        calcular("comprimento", amostra);
+        calcular("profundidade", amostra);
     }
+
 }

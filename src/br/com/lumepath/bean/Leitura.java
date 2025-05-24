@@ -9,7 +9,6 @@ package br.com.lumepath.bean;
 
 public interface Leitura {
     void lerSensor(Sensor sensor);
-    void armazenarDado();
     void calcular(String tipoDeMedida, Amostra amostra);
 
 }
