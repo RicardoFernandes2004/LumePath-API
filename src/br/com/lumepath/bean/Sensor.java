@@ -23,23 +23,14 @@ public interface Sensor {
      * Inicializa o sensor, preparando-o para operação.
      * Deve ser chamado antes de qualquer leitura ou armazenamento de dados.
      */
-    void iniciar();
+    void iniciar(Leitor leitor);
 
     /**
      * Realiza a leitura dos dados brutos do sensor.
      *
      * @return um {@code double} representando o valor lido na unidade apropriada do sensor.
      */
-    double lerDados();
-
-    /**
-     * Armazena os dados brutos obtidos na última leitura do sensor em uma lista fornecida.
-     *
-     * @param lista a lista onde os dados brutos devem ser armazenados.
-     */
-    void armazenarDado(List<Double> lista);
-
-    void armazenarDado(Double dado);
+    double lerDados(Leitor leitor);
 
     /**
      * Reseta o estado interno do sensor para sua configuração inicial.
@@ -58,8 +49,6 @@ public interface Sensor {
      * @param tipoDeMedida a medida a ser calculada (por exemplo, "altura", "comprimento" ou "profundidade").
      * @param amostra o objeto {@link Amostra} onde o resultado do cálculo será armazenado.
      */
-    void calcular(String tipoDeMedida, Amostra amostra);
-
     /**
      * Encerra o uso do sensor, liberando recursos alocados e atualizando o estado interno.
      *
@@ -73,6 +62,8 @@ public interface Sensor {
      * <p>Este metodo ajusta os parâmetros internos do sensor conforme especificações do hardware.</p>
      */
     void calibrar();
+
+    void enviarDadosAoLeitor(Leitor leitor);
 
     /**
      * Obtém a velocidade atual do slider, um parâmetro crítico para os cálculos baseados no tempo de detecção.

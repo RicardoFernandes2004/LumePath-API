@@ -1,11 +1,11 @@
 package br.com.lumepath.bean;
 
-import java.time.LocalDateTime;
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementação concreta da interface {@link Sensor} para sensores baseados em tecnologia laser.
+ * Implementação da interface {@link Sensor} para sensores baseados em tecnologia laser.
  * <p>
  * Capaz de realizar medições em altura, profundidade e comprimento através da detecção contínua
  * de obstáculos via feixe laser.
@@ -15,7 +15,6 @@ public class SensorLaser implements Sensor {
 
     private String portaSerial;
     private double velocidadeAtualDoSlider;
-    private boolean detectando = false;
     private boolean calibrado = false;
     private boolean ativo = false;
     /**
@@ -55,7 +54,6 @@ public class SensorLaser implements Sensor {
 
     /**
      * Define a porta serial utilizada pelo sensor.
-     *
      * O metodo isEmpty() é utilizado para verificar se a string representando a porta serial é vazia.
      *
      * @param portaSerial a nova porta serial.
@@ -78,42 +76,26 @@ public class SensorLaser implements Sensor {
     /**
      * Ativa ou desativa o sensor. Se não calibrado, realiza calibração automaticamente.
      *
-     * @param ativo {@code true} para ativar, {@code false} para desativar.
      */
-    public void setAtivo(boolean ativo) {
+    public void setAtivo() {
         if (!isCalibrado()) {
             calibrar();
         }
-        this.ativo = ativo;
+        this.ativo = !this.ativo;
     }
 
     public boolean isCalibrado() {
         return calibrado;
     }
-
-    @Override
-    public void iniciar() {
-        setAtivo(true);
-    }
-
-    @Override
-    public double lerDados() {
-        if (!detectando) {
-            return 0.0;
-        } else {
-            return 1;
-        }
-    }
-
     /**
      * Armazena dados lidos continuamente enquanto houver detecção.
      *
      * @param lista lista onde os dados devem ser armazenados.
      */
-    @Override
-    public void armazenarDado(List<Double> lista) {
-        while (detectando) {
-            double dado = lerDados();
+
+    public void armazenarDado(List<Double> lista, Leitor leitor) {
+        while (leitor.isDetectando()) {
+            double dado = lerDados(leitor);
             if (dado != 0) {
                 lista.add(dado);
             }
@@ -121,64 +103,63 @@ public class SensorLaser implements Sensor {
     }
 
     @Override
-    public void armazenarDado(Double dado) {
+    public void iniciar(Leitor leitor) {
+        setAtivo();
+        try {
+            int alturaTesteAmostra=Integer.parseInt(JOptionPane.showInputDialog("Digite o altura da amostra: "));
+            leitor.setDetectando();
+            for (int i = 0; i < alturaTesteAmostra; i++) {
+                armazenarDado(dadosAltura,leitor);
+            }
+            leitor.setDetectando();
+
+            int comprimentoTesteAmostra = Integer.parseInt(JOptionPane.showInputDialog("Digite o comprimento da amostra: "));
+            leitor.setDetectando();
+            for (int i = 0; i < comprimentoTesteAmostra; i++) {
+                armazenarDado(dadosComprimento,leitor);
+            }
+            leitor.setDetectando();
+
+            int profundidadeTesteAmostra = Integer.parseInt(JOptionPane.showInputDialog("Digite a profundidade da amostra: "));
+            leitor.setDetectando();
+            for (int i = 0; i < profundidadeTesteAmostra; i++) {
+                armazenarDado(dadosProfundidade,leitor);
+            }
+            leitor.setDetectando();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro de input, digite apenas números.", JOptionPane.ERROR_MESSAGE);
+        }
+
 
     }
 
-    /**
-     * Reseta o sensor: limpa dados, desativa e reativa.
-     */
     @Override
-    public void reset() {
-        dadosProfundidade.clear();
-        dadosComprimento.clear();
-        dadosAltura.clear();
-        calibrado = false;
-        setAtivo(false);
-        setAtivo(true);
-    }
-
-    /**
-     * Realiza o cálculo de uma medida com base nos dados armazenados e na velocidade do slider.
-     *
-     * O metodo isEmpty() é utilizado para garantir a segurança na operação de cálculo,     prevenindo a realização de operações aritméticas ou lógicas sobre listas vazias, o que poderia gerar resultados incorretos ou até exceções.
-     *
-     * @param tipoDeMedida "altura", "comprimento" ou "profundidade".
-     * @param amostra objeto {@link Amostra} onde o resultado será armazenado.
-     * @throws IllegalArgumentException se o tipo de medida for inválido.
-     */
-    @Override
-    public void calcular(String tipoDeMedida, Amostra amostra) {
-        switch (tipoDeMedida) {
-            case "altura":
-                if (!dadosAltura.isEmpty()) {
-                    amostra.setAltura(getVelocidadeAtualDoSlider() * (dadosAltura.size() - 1));
-                } else {
-                    amostra.setAltura(0);
-                }
-                break;
-            case "comprimento":
-                if (!dadosComprimento.isEmpty()) {
-                    amostra.setComprimento(getVelocidadeAtualDoSlider() * (dadosComprimento.size() - 1));
-                } else {
-                    amostra.setComprimento(0);
-                }
-                break;
-            case "profundidade":
-                if (!dadosProfundidade.isEmpty()) {
-                    amostra.setProfundidade(getVelocidadeAtualDoSlider() * (dadosProfundidade.size() - 1));
-                } else {
-                    amostra.setProfundidade(0);
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Tipo inválido: " + tipoDeMedida);
+    public double lerDados(Leitor leitor) {
+        if (!leitor.isDetectando()) {
+            return 0.0;
+        } else {
+            return 1;
         }
     }
 
+
+
+    /**
+     * Reseta o sensor: limpa dados para desativação segura
+     */
+    @Override
+    public void reset() {
+        this.dadosProfundidade.clear();
+        this.dadosComprimento.clear();
+        this.dadosAltura.clear();
+        this.calibrado = false;
+    }
+
+
     @Override
     public void encerrar() {
-        setAtivo(false);
+        reset();
+        setAtivo();
     }
 
     /**
@@ -191,6 +172,13 @@ public class SensorLaser implements Sensor {
             this.velocidadeAtualDoSlider = velocidadeDoSlider;
         }
         this.calibrado = true;
+    }
+
+    @Override
+    public void enviarDadosAoLeitor(Leitor leitor) {
+        leitor.addDadosAltura((double)(this.getDadosAltura().size()-1));
+        leitor.addDadosProfundidade((double)this.getDadosProfundidade().size()-1);
+        leitor.addDadosComprimento((double)this.getDadosComprimento().size()-1);
     }
 
     /**
