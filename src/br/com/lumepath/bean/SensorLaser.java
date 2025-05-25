@@ -1,14 +1,15 @@
 package br.com.lumepath.bean;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implementação da interface {@link Sensor} para sensores baseados em tecnologia laser.
  * <p>
- * Capaz de realizar medições em altura, profundidade e comprimento através da detecção contínua
- * de obstáculos via feixe laser.
+ * Atualmente realiza a leitura mockada via JOptionPane.
+ * <p>
+ * Futuramente será implementada com coleta automática contínua,
+ * utilizando estruturas de dados como Map e List para armazenar medições
+ * e realizar cálculos com base na equação S = v * Δt.
  * </p>
  */
 public class SensorLaser implements Sensor {
@@ -17,14 +18,10 @@ public class SensorLaser implements Sensor {
     private double velocidadeAtualDoSlider;
     private boolean calibrado = false;
     private boolean ativo = false;
-    /**
-     * O uso do ArrayList é essencial para armazenar as diversas medições realizadas pelo   sensor durante o processo de detecção.
-     * Como o sensor realiza medições contínuas e dinâmicas ao longo do tempo, a quantidade de dados não é conhecida previamente, variando conforme o contexto de uso.
-     * O array list também conta com o metodo size, que é crucial para tornar o calculo do tamanho da amostra dinâmico, entrando como o Δd na fórmula S = v * Δd.
-     * */
-    private final List<Double> dadosAltura = new ArrayList<>();
-    private final List<Double> dadosProfundidade = new ArrayList<>();
-    private final List<Double> dadosComprimento = new ArrayList<>();
+
+    private double altura;
+    private double comprimento;
+    private double profundidade;
 
     /**
      * Construtor que define a porta serial utilizada pelo sensor.
@@ -36,29 +33,10 @@ public class SensorLaser implements Sensor {
         setPortaSerial(portaSerial);
     }
 
-    public List<Double> getDadosComprimento() {
-        return dadosComprimento;
-    }
-
-    public List<Double> getDadosAltura() {
-        return dadosAltura;
-    }
-
-    public List<Double> getDadosProfundidade() {
-        return dadosProfundidade;
-    }
-
     public String getPortaSerial() {
         return portaSerial;
     }
 
-    /**
-     * Define a porta serial utilizada pelo sensor.
-     * O metodo isEmpty() é utilizado para verificar se a string representando a porta serial é vazia.
-     *
-     * @param portaSerial a nova porta serial.
-     * @throws IllegalArgumentException se a porta for nula, vazia ou estiver em formato inválido.
-     */
     public void setPortaSerial(String portaSerial) {
         if (portaSerial == null || portaSerial.trim().isEmpty()) {
             throw new IllegalArgumentException("Porta serial não pode ser nula ou vazia.");
@@ -75,7 +53,6 @@ public class SensorLaser implements Sensor {
 
     /**
      * Ativa ou desativa o sensor. Se não calibrado, realiza calibração automaticamente.
-     *
      */
     public void setAtivo() {
         if (!isCalibrado()) {
@@ -87,50 +64,29 @@ public class SensorLaser implements Sensor {
     public boolean isCalibrado() {
         return calibrado;
     }
-    /**
-     * Armazena dados lidos continuamente enquanto houver detecção.
-     *
-     * @param lista lista onde os dados devem ser armazenados.
-     */
-
-    public void armazenarDado(List<Double> lista, Leitor leitor) {
-        while (leitor.isDetectando()) {
-            double dado = lerDados(leitor);
-            if (dado != 0) {
-                lista.add(dado);
-            }
-        }
-    }
 
     @Override
     public void iniciar(Leitor leitor) {
         setAtivo();
         try {
-            int alturaTesteAmostra=Integer.parseInt(JOptionPane.showInputDialog("Digite a altura da amostra: "));
-            leitor.setDetectando();
-            for (int i = 0; i < alturaTesteAmostra; i++) {
-                armazenarDado(dadosAltura,leitor);
-            }
-            leitor.setDetectando();
+            altura = Double.parseDouble(JOptionPane.showInputDialog("Digite a altura da amostra: "));
+            comprimento = Double.parseDouble(JOptionPane.showInputDialog("Digite o comprimento da amostra: "));
+            profundidade = Double.parseDouble(JOptionPane.showInputDialog("Digite a profundidade da amostra: "));
 
-            int comprimentoTesteAmostra = Integer.parseInt(JOptionPane.showInputDialog("Digite o comprimento da amostra: "));
-            leitor.setDetectando();
-            for (int i = 0; i < comprimentoTesteAmostra; i++) {
-                armazenarDado(dadosComprimento,leitor);
-            }
-            leitor.setDetectando();
 
-            int profundidadeTesteAmostra = Integer.parseInt(JOptionPane.showInputDialog("Digite a profundidade da amostra: "));
-            leitor.setDetectando();
-            for (int i = 0; i < profundidadeTesteAmostra; i++) {
-                armazenarDado(dadosProfundidade,leitor);
-            }
-            leitor.setDetectando();
+
+            leitor.setDetectando(); // ativa a detecção
+
+            // Envia diretamente os dados lidos para o leitor
+            leitor.setLeituraAltura(altura);
+            leitor.setLeituraComprimento(comprimento);
+            leitor.setLeituraProfundidade(profundidade);
+
+            leitor.setDetectando(); // desativa a detecção
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Erro de input, digite apenas números.", JOptionPane.ERROR_MESSAGE);
         }
-
-
     }
 
     @Override
@@ -138,23 +94,17 @@ public class SensorLaser implements Sensor {
         if (!leitor.isDetectando()) {
             return 0.0;
         } else {
-            return 1;
+            return 1;  // Futuramente será o dado real capturado automaticamente
         }
     }
 
-
-
-    /**
-     * Reseta o sensor: limpa dados para desativação segura
-     */
     @Override
     public void reset() {
-        this.dadosProfundidade.clear();
-        this.dadosComprimento.clear();
-        this.dadosAltura.clear();
+        this.altura = 0;
+        this.comprimento = 0;
+        this.profundidade = 0;
         this.calibrado = false;
     }
-
 
     @Override
     public void encerrar() {
@@ -162,9 +112,6 @@ public class SensorLaser implements Sensor {
         setAtivo();
     }
 
-    /**
-     * Realiza a calibração, ajustando a velocidade padrão do slider.
-     */
     @Override
     public void calibrar() {
         double velocidadeDoSlider = 0.05; // m/s
@@ -176,9 +123,8 @@ public class SensorLaser implements Sensor {
 
     @Override
     public void enviarDadosAoLeitor(Leitor leitor) {
-        leitor.addDadosAltura((double)(this.getDadosAltura().size()-1));
-        leitor.addDadosProfundidade((double)this.getDadosProfundidade().size()-1);
-        leitor.addDadosComprimento((double)this.getDadosComprimento().size()-1);
+        // Futuramente será implementado com envio automático de medições contínuas.
+        // Atualmente, é enviado diretamente na leitura mockada via iniciar().
     }
 
     /**

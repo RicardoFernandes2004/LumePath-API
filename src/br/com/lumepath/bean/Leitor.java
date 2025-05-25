@@ -2,18 +2,16 @@ package br.com.lumepath.bean;
 
 import javax.swing.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-public class Leitor implements Leitura{
+public class Leitor implements Leitura {
     private final Sensor sensor;
     private final Amostra amostra;
     private double precisao;
     private LocalDateTime ultimaLeitura;
     private boolean detectando = false;
-    private final List<Double> dadosProfundidade = new ArrayList<>();
-    private final List<Double> dadosComprimento = new ArrayList<>();
-    private final List<Double> dadosAltura = new ArrayList<>();
+    private double leituraAltura;
+    private double leituraComprimento;
+    private double leituraProfundidade;
     private double leituraCameraAltura;
     private double leituraCameraComprimento;
 
@@ -21,7 +19,6 @@ public class Leitor implements Leitura{
         this.sensor = sensor;
         this.amostra = amostra;
     }
-
 
     public LocalDateTime getUltimaLeitura() {
         return ultimaLeitura;
@@ -55,46 +52,21 @@ public class Leitor implements Leitura{
         this.leituraCameraComprimento = leituraCameraComprimento;
     }
 
-    public List<Double> getDadosAltura() {
-        return dadosAltura;
+    public void setLeituraAltura(double leituraAltura) {
+        this.leituraAltura = leituraAltura;
     }
 
-    public void addDadosAltura(Double Altura) {
-        this.dadosAltura.add(Altura);
+    public void setLeituraComprimento(double leituraComprimento) {
+        this.leituraComprimento = leituraComprimento;
     }
 
-    public List<Double> getDadosComprimento() {
-        return dadosComprimento;
-    }
-
-    public void addDadosComprimento(Double Comprimento) {
-        this.dadosComprimento.add(Comprimento);
-    }
-
-    public List<Double> getDadosProfundidade() {
-        return dadosProfundidade;
-    }
-
-    public void addDadosProfundidade(Double Profundidade) {
-        this.dadosProfundidade.add(Profundidade);
+    public void setLeituraProfundidade(double leituraProfundidade) {
+        this.leituraProfundidade = leituraProfundidade;
     }
 
     public void calcPrecisao() {
-        double medidaAltura = sensor.getVelocidadeAtualDoSlider() * (dadosAltura.size() - 1);
-        double medidaComprimento = sensor.getVelocidadeAtualDoSlider() * (dadosComprimento.size() - 1);
-
-        // Calcula o erro
-        double erroAltura = leituraCameraAltura - medidaAltura;
-        if (erroAltura < 0) {
-            erroAltura = -erroAltura;
-        }
-
-        double erroComprimento = leituraCameraComprimento - medidaComprimento;
-        if (erroComprimento < 0) {
-            erroComprimento = -erroComprimento;
-        }
-
-        // Faz a média dos erros
+        double erroAltura = Math.abs(leituraCameraAltura - leituraAltura);
+        double erroComprimento = Math.abs(leituraCameraComprimento - leituraComprimento);
         this.precisao = (erroAltura + erroComprimento) / 2;
     }
 
@@ -102,37 +74,17 @@ public class Leitor implements Leitura{
         return precisao;
     }
 
-    /**
-     * Realiza o cálculo de uma medida com base nos dados armazenados e na velocidade do slider.
-     * O metodo isEmpty() é utilizado para garantir a segurança na operação de cálculo,     prevenindo a realização de operações aritméticas ou lógicas sobre listas vazias, o que poderia gerar resultados incorretos ou até exceções.
-     *
-     * @param tipoDeMedida "altura", "comprimento" ou "profundidade".
-     * @param amostra objeto {@link Amostra} onde o resultado será armazenado.
-     * @throws IllegalArgumentException se o tipo de medida for inválido.
-     */
     @Override
     public void calcular(String tipoDeMedida, Amostra amostra) {
         switch (tipoDeMedida) {
             case "altura":
-                if (!dadosAltura.isEmpty()) {
-                    amostra.setAltura(sensor.getVelocidadeAtualDoSlider() * (getDadosAltura().size() - 1));
-                } else {
-                    amostra.setAltura(0);
-                }
+                amostra.setAltura(leituraAltura);
                 break;
             case "comprimento":
-                if (!dadosComprimento.isEmpty()) {
-                    amostra.setComprimento(sensor.getVelocidadeAtualDoSlider() * (getDadosComprimento().size() - 1));
-                } else {
-                    amostra.setComprimento(0);
-                }
+                amostra.setComprimento(leituraComprimento);
                 break;
             case "profundidade":
-                if (!dadosProfundidade.isEmpty()) {
-                    amostra.setProfundidade(sensor.getVelocidadeAtualDoSlider() * (getDadosProfundidade().size() - 1));
-                } else {
-                    amostra.setProfundidade(0);
-                }
+                amostra.setProfundidade(leituraProfundidade);
                 break;
             default:
                 throw new IllegalArgumentException("Tipo inválido: " + tipoDeMedida);
@@ -140,19 +92,22 @@ public class Leitor implements Leitura{
     }
 
     @Override
-    public void lerSensor(Sensor sensor) {
-    sensor.iniciar(this);
-    sensor.encerrar();
-    calcPrecisao();
-    enviarDadosAmostra(amostra);
-    JOptionPane.showMessageDialog(null,String.format("Precisão da medição: %.2f", getPrecisao()));
-    setUltimaLeitura();
+    public void lerSensor() {
+        sensor.iniciar(this);
+        //sensor.enviarDadosAoLeitor(this);
+        enviarDadosAmostra(amostra);
+        sensor.encerrar();
+        setUltimaLeitura();
     }
 
     public void enviarDadosAmostra(Amostra amostra) {
-        calcular("altura", amostra);
-        calcular("comprimento", amostra);
-        calcular("profundidade", amostra);
+        if (!(sensor instanceof SensorOpenCV)) {
+            calcular("altura", amostra);
+            calcular("comprimento", amostra);
+            calcular("profundidade", amostra);
+        }
+        // Se for SensorOpenCV, não faz nada:
+        // pois a câmera não preenche as leituras que alimentam a amostra
     }
 
 }

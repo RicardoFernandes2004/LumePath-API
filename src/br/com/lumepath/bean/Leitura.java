@@ -8,7 +8,7 @@ package br.com.lumepath.bean;
  */
 
 public interface Leitura {
-    void lerSensor(Sensor sensor);
+    void lerSensor();
     void calcular(String tipoDeMedida, Amostra amostra);
 
 }

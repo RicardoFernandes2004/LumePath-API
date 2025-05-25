@@ -35,9 +35,9 @@ public class Amostra {
      * @param localAnatomico localização anatômica da coleta.
      */
     public Amostra(String localDaColeta, String tipoDeColeta, String localAnatomico) {
-        this.localDaColeta = localDaColeta;
-        this.tipoDeColeta = tipoDeColeta;
-        this.localAnatomico = localAnatomico;
+        setLocalDaColeta(localDaColeta);
+        setTipoDeColeta(tipoDeColeta);
+        setLocalAnatomico(localAnatomico);
     }
 
     public LocalDate getDataDeColeta() {
@@ -106,7 +106,7 @@ public class Amostra {
      * @throws IllegalArgumentException se o valor for negativo.
      */
     public void setComprimento(double comprimento) {
-        if (comprimento <= 0) {
+        if (comprimento >= 0) {
             this.comprimento = comprimento;
         } else {
             throw new IllegalArgumentException("Comprimento deve ser maior ou igual a zero");
@@ -124,7 +124,7 @@ public class Amostra {
      * @throws IllegalArgumentException se o valor for negativo.
      */
     public void setAltura(double altura) {
-        if (altura <= 0) {
+        if (altura >= 0) {
             this.altura = altura;
         } else {
             throw new IllegalArgumentException("Altura deve ser maior ou igual a zero");
@@ -142,7 +142,7 @@ public class Amostra {
      * @throws IllegalArgumentException se o valor for negativo.
      */
     public void setProfundidade(double profundidade) {
-        if (profundidade <= 0) {
+        if (profundidade >= 0) {
             this.profundidade = profundidade;
         } else {
             throw new IllegalArgumentException("Profundidade deve ser maior ou igual a zero");
