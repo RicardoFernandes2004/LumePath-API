@@ -19,17 +19,17 @@ public class SensorLaser implements Sensor {
     /** Porta serial utilizada para comunicação com o sensor. Ex.: COM3, /dev/ttyUSB0 */
     private String portaSerial;
 
-    /** Velocidade atual do slider em metros por segundo (m/s). Essencial para cálculos físicos. */
+    /** Velocidade atual do slider em metros por segundo (m/s). */
     private double velocidadeAtualDoSlider;
 
-    /** Estado de calibração do sensor. Fundamental para garantir leituras precisas. */
+    /** Estado de calibração do sensor. */
     private boolean calibrado = false;
 
     /** Estado de ativação do sensor. Determina se o sensor está operacional. */
     private boolean ativo = false;
 
-    /** Leituras brutas mockadas da amostra: altura, comprimento e profundidade. Futuramente trocar por um
-     * map por causa do JWT */
+    /** Leituras brutas da amostra: altura, comprimento e profundidade. Futuramente trocar por um
+     * map*/
     private double altura;
     private double comprimento;
     private double profundidade;
@@ -37,7 +37,6 @@ public class SensorLaser implements Sensor {
      * Construtor que define a porta serial utilizada pelo sensor.
      *
      * @param portaSerial a porta serial para comunicação com o hardware.
-     * @throws IllegalArgumentException se a porta for nula, vazia ou não estiver no formato esperado.
      */
     public SensorLaser(String portaSerial) {
         setPortaSerial(portaSerial);
@@ -58,16 +57,21 @@ public class SensorLaser implements Sensor {
      * </p>
      *
      * @param portaSerial a string representando a porta serial.
-     * @throws IllegalArgumentException se a porta for nula, vazia ou estiver em formato inválido.
      */
     public void setPortaSerial(String portaSerial) {
-        if (portaSerial == null || portaSerial.trim().isEmpty()) {
-            throw new IllegalArgumentException("Porta serial não pode ser nula ou vazia.");
+        try {
+            if (portaSerial == null || portaSerial.trim().isEmpty()) {
+                throw new Exception("Porta serial não pode ser nula ou vazia.");
+            }
+            if (!(portaSerial.matches("COM[0-9]+") || portaSerial.matches("/dev/tty\\w+"))) {
+                throw new Exception("Formato de porta serial inválido: " + portaSerial);
+            }
+            this.portaSerial = portaSerial;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e, "Erro", JOptionPane.ERROR_MESSAGE);
+            setPortaSerial(JOptionPane.showInputDialog("Digite novamente a porta serial: "));
         }
-        if (!(portaSerial.matches("COM[0-9]+") || portaSerial.matches("/dev/tty\\w+"))) {
-            throw new IllegalArgumentException("Formato de porta serial inválido: " + portaSerial);
-        }
-        this.portaSerial = portaSerial;
+
     }
 
 
@@ -90,13 +94,13 @@ public class SensorLaser implements Sensor {
     }
 
     /**
-     * Inicializa o sensor, ativando-o e realizando a leitura mockada dos dados da amostra.
+     * Inicializa o sensor, ativando-o e realizando a leitura dos dados da amostra.
      *
-     * <p>Este metodo solicita ao usuário, via {@link JOptionPane}, a entrada dos valores de altura, comprimento e profundidade, que futuramente serão recebidas por uma lista, aplicando a fórmula
+     * <p>Este metodo solicita ao usuário, via {@link JOptionPane}, a entrada dos valores de altura, comprimento e profundidade, que futuramente serão alocados a uma lista, aplicando a fórmula
      * L = v * Δt.
      * Após a leitura, os dados são enviados diretamente ao {@link Leitor} correspondente.</p>
      *
-     * <p>O metodo também ativa e desativa o estado de detecção do leitor, simulando um ciclo de leitura real.</p>
+     * <p>O metodo também ativa e desativa o estado de detecção do leitor, simulando um ciclo de leitura.</p>
      *
      * @param leitor o objeto {@link Leitor} que receberá os dados lidos do sensor.
      */
@@ -104,13 +108,21 @@ public class SensorLaser implements Sensor {
     public void iniciar(Leitor leitor) {
         setAtivo();
         try {
-            altura = Double.parseDouble(JOptionPane.showInputDialog("Digite a altura da amostra: "));
-            comprimento = Double.parseDouble(JOptionPane.showInputDialog("Digite o comprimento da amostra: "));
-            profundidade = Double.parseDouble(JOptionPane.showInputDialog("Digite a profundidade da amostra: "));
+            String inputAltura = JOptionPane.showInputDialog("Digite a altura da amostra:");
+            String inputComprimento = JOptionPane.showInputDialog("Digite o comprimento da amostra:");
+            String inputProfundidade = JOptionPane.showInputDialog("Digite a profundidade da amostra:");
+
+            if (inputAltura == null || inputComprimento == null || inputProfundidade == null) {
+                JOptionPane.showMessageDialog(null, "Operação cancelada pelo usuário.", "Cancelado", JOptionPane.WARNING_MESSAGE);
+                return;// Evita null pointer
+            }
+
+            altura = Double.parseDouble(inputAltura);
+            comprimento = Double.parseDouble(inputComprimento);
+            profundidade = Double.parseDouble(inputProfundidade);
 
             leitor.setDetectando(); // ativa a detecção
 
-            // Envia diretamente os dados lidos para o leitor
             leitor.setLeituraAltura(altura);
             leitor.setLeituraComprimento(comprimento);
             leitor.setLeituraProfundidade(profundidade);
@@ -118,7 +130,7 @@ public class SensorLaser implements Sensor {
             leitor.setDetectando(); // desativa a detecção
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro de input, digite apenas números.", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Erro: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 

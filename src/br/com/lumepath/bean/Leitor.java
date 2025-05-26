@@ -64,30 +64,87 @@ public class Leitor implements Leitura {
     public double getLeituraCameraAltura() {
         return leituraCameraAltura;
     }
-
-    public void setLeituraCameraAltura(double leituraCameraAltura) {
-        this.leituraCameraAltura = leituraCameraAltura;
-    }
-
     public double getLeituraCameraComprimento() {
         return leituraCameraComprimento;
     }
 
-    public void setLeituraCameraComprimento(double leituraCameraComprimento) {
-        this.leituraCameraComprimento = leituraCameraComprimento;
+    public void setLeituraCameraAltura(double leituraCameraAltura) {
+        try {
+            if (leituraCameraAltura < 0) {
+                throw new Exception("Leitura da altura da câmera não pode ser negativa.");
+            }
+            if (leituraCameraAltura > 500) {
+                throw new Exception("Leitura da altura da câmera excede o limite máximo permitido.");
+            }
+            this.leituraCameraAltura = leituraCameraAltura;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            setLeituraCameraAltura(Double.parseDouble(JOptionPane.showInputDialog("Digite novamente a altura detectada pela câmera:")));
+        }
     }
 
+    public void setLeituraCameraComprimento(double leituraCameraComprimento) {
+        try {
+            if (leituraCameraComprimento < 0) {
+                throw new Exception("Leitura do comprimento da câmera não pode ser negativa.");
+            }
+            if (leituraCameraComprimento > 500) {
+                throw new Exception("Leitura do comprimento da câmera excede o limite máximo permitido.");
+            }
+            this.leituraCameraComprimento = leituraCameraComprimento;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+
+            setLeituraCameraComprimento(Double.parseDouble(JOptionPane.showInputDialog("Digite novamente o comprimento detectado pela câmera:")));
+        }
+    }
+
+
     public void setLeituraAltura(double leituraAltura) {
-        this.leituraAltura = leituraAltura;
+        try {
+            if (leituraAltura < 0) {
+                throw new Exception("Leitura de altura não pode ser negativa.");
+            }
+            if (leituraAltura > 500) {
+                throw new Exception("Leitura de altura excede o limite máximo permitido.");
+            }
+            this.leituraAltura = leituraAltura;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            setLeituraAltura(Double.parseDouble(JOptionPane.showInputDialog("Digite novamente a altura:")));
+        }
     }
 
     public void setLeituraComprimento(double leituraComprimento) {
-        this.leituraComprimento = leituraComprimento;
+        try {
+            if (leituraComprimento < 0) {
+                throw new Exception("Leitura de comprimento não pode ser negativa.");
+            }
+            if (leituraComprimento > 500) {
+                throw new Exception("Leitura de comprimento excede o limite máximo permitido.");
+            }
+            this.leituraComprimento = leituraComprimento;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            setLeituraComprimento(Double.parseDouble(JOptionPane.showInputDialog("Digite novamente o comprimento:")));
+        }
     }
 
     public void setLeituraProfundidade(double leituraProfundidade) {
-        this.leituraProfundidade = leituraProfundidade;
+        try {
+            if (leituraProfundidade < 0) {
+                throw new Exception("Leitura de profundidade não pode ser negativa.");
+            }
+            if (leituraProfundidade > 500) {
+                throw new Exception("Leitura de profundidade excede o limite máximo permitido.");
+            }
+            this.leituraProfundidade = leituraProfundidade;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            setLeituraProfundidade(Double.parseDouble(JOptionPane.showInputDialog("Digite novamente a profundidade:")));
+        }
     }
+
 
 
     /**
@@ -111,23 +168,28 @@ public class Leitor implements Leitura {
      *
      * @param tipoDeMedida tipo da medida a ser calculada: "altura", "comprimento" ou "profundidade".
      * @param amostra a {@link Amostra} onde o resultado será armazenado.
-     * @throws IllegalArgumentException se o tipo de medida for inválido.
      */
     @Override
     public void calcular(String tipoDeMedida, Amostra amostra) {
-        switch (tipoDeMedida) {
-            case "altura":
-                amostra.setAltura(leituraAltura);
-                break;
-            case "comprimento":
-                amostra.setComprimento(leituraComprimento);
-                break;
-            case "profundidade":
-                amostra.setProfundidade(leituraProfundidade);
-                break;
-            default:
-                throw new IllegalArgumentException("Tipo inválido: " + tipoDeMedida);
+        try {
+            switch (tipoDeMedida) {
+                case "altura":
+                    amostra.setAltura(leituraAltura);
+                    break;
+                case "comprimento":
+                    amostra.setComprimento(leituraComprimento);
+                    break;
+                case "profundidade":
+                    amostra.setProfundidade(leituraProfundidade);
+                    break;
+                default:
+                    throw new Exception("Tipo inválido: " + tipoDeMedida);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
         }
+
     }
 
     /**
@@ -137,7 +199,7 @@ public class Leitor implements Leitura {
      * <p>Ao final do ciclo, atualiza a data/hora da última leitura realizada.</p>
      */
     @Override
-    public void lerSensor() {
+    public void lerSensor(){
         sensor.iniciar(this);
         //sensor.enviarDadosAoLeitor(this);
         enviarDadosAmostra(amostra);

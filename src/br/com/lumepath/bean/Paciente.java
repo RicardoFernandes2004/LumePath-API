@@ -4,6 +4,7 @@ import br.com.lumepath.utils.ValidaCpf;
 
 import javax.swing.*;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -33,17 +34,15 @@ public class Paciente {
      * @param dataDeNascimento Data de nascimento no formato "dd-MM-yyyy".
      * @param sexo Sexo do paciente.
      * @param codigoProntuario Código de prontuário do paciente.
-     * @throws Exception Caso o CPF seja inválido ou a data de nascimento seja anterior a 01-01-1900.
      */
-    public Paciente(int id,String nome, String cpf, String dataDeNascimento, String sexo, int codigoProntuario) throws Exception {
+    public Paciente(int id,String nome, String cpf, String dataDeNascimento, String sexo, int codigoProntuario){
         setId(id);
         this.nome = nome;
         setCpf(cpf);
         setDataDeNascimento(dataDeNascimento);
-        this.sexo = sexo;
+        setSexo(sexo);
         this.codigoProntuario = codigoProntuario;
     }
-
 
 
     public void setId(int id) {
@@ -56,13 +55,13 @@ public class Paciente {
 
         }catch(Exception e){
             JOptionPane.showMessageDialog(null, e, "Erro", JOptionPane.ERROR_MESSAGE);
+            setId(Integer.parseInt(JOptionPane.showInputDialog("Tente novamente mais que 0")));
         }
     }
 
     public int getId(){
         return id;
     }
-    public Paciente(){}
 
     public String getNome() {
         return nome;
@@ -80,6 +79,20 @@ public class Paciente {
         return ValidaCpf.imprimeCPF(cpf);
     }
 
+    public int getIdade() {
+        LocalDate hoje = LocalDate.now();
+        Period periodo = Period.between(getDataDeNascimento(), hoje);
+        return periodo.getYears();
+    }
+
+    public String getResumo() {
+        return String.format("%s (%s) - %d anos - Código Prontuário: %d",
+                getNome(),
+                getSexo(),
+                getIdade(),
+                getCodigoProntuario());
+    }
+
     /**
      * Define o CPF do paciente. O CPF é validado antes de ser atribuído.
      *
@@ -93,7 +106,8 @@ public class Paciente {
                 throw new Exception("CPF Inválido");
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage());
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            setCpf(JOptionPane.showInputDialog("Tente novamente"));
         }
     }
 
@@ -115,7 +129,8 @@ public class Paciente {
                 throw new Exception("Idade inválida");
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage());
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            setDataDeNascimento(JOptionPane.showInputDialog("Tente novamente"));
         }
     }
 
@@ -124,7 +139,23 @@ public class Paciente {
     }
 
     public void setSexo(String sexo) {
-        this.sexo = sexo;
+        try {
+            if (sexo == null || sexo.trim().isEmpty()) {
+                throw new Exception("Sexo não pode ser nulo ou vazio.");
+            }
+
+            sexo = sexo.toUpperCase();
+
+            if (!sexo.equals("M") && !sexo.equals("F")) {
+                throw new Exception("Sexo inválido. Use 'M' para masculino ou 'F' para feminino.");
+            }
+
+            this.sexo = sexo;
+
+        } catch (Exception e) {
+            System.out.println("Erro ao definir sexo: " + e.getMessage());
+            setSexo(JOptionPane.showInputDialog("Tente novamente"));
+        }
     }
 
     public int getCodigoProntuario() {

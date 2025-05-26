@@ -40,18 +40,22 @@ public class SensorOpenCV implements Sensor {
      * </p>
      *
      * @param portaSerial a string representando a porta serial.
-     * @throws IllegalArgumentException se a porta for nula, vazia ou estiver em formato inválido.
      */
     public void setPortaSerial(String portaSerial) {
-        if (portaSerial == null || portaSerial.trim().isEmpty()) {
-            throw new IllegalArgumentException("Porta serial não pode ser nula ou vazia.");
+        try {
+            if (portaSerial == null || portaSerial.trim().isEmpty()) {
+                throw new Exception("Porta serial não pode ser nula ou vazia.");
+            }
+            if (!(portaSerial.matches("COM[0-9]+") || portaSerial.matches("/dev/tty\\w+"))) {
+                throw new Exception("Formato de porta serial inválido: " + portaSerial);
+            }
+            this.portaSerial = portaSerial;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            setPortaSerial(JOptionPane.showInputDialog("Digite uma porta novamente: "));
         }
-        if (!(portaSerial.matches("COM[0-9]+") || portaSerial.matches("/dev/tty\\w+"))) {
-            throw new IllegalArgumentException("Formato de porta serial inválido: " + portaSerial);
-        }
-        this.portaSerial = portaSerial;
-    }
 
+    }
     public boolean isAtivo() {
         return ativo;
     }
@@ -127,7 +131,7 @@ public class SensorOpenCV implements Sensor {
      */
     @Override
     public void enviarDadosAoLeitor(Leitor leitor) {
-        // Não necessário — dados já enviados diretamente em iniciar()
+        // ainda n
     }
 
     /**
