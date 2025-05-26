@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args){
         Sensor sensorLaser = new SensorLaser("COM5");
         Sensor sensorCamera = new SensorOpenCV("COM5");
-        Amostra amostra = new Amostra("Hospital xambão", "Oncologia", "Tórax");
+        Amostra amostra = new Amostra(56643,"Hospital xambão", "Oncologia", "Tórax");
         Leitor leitorLaser = new Leitor(sensorLaser, amostra);
         Leitor leitorCamera = new Leitor(sensorCamera, amostra);
 

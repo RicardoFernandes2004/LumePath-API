@@ -1,5 +1,6 @@
 package br.com.lumepath.bean;
 
+import javax.swing.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -18,8 +19,12 @@ import java.util.UUID;
  */
 public class Amostra {
 
-    private final UUID id = UUID.randomUUID();
+    /** Identificador único da amostra */
+    private int id;
+
+    /** Data da coleta, definida automaticamente no momento da criação da amostra. */
     private final LocalDate dataDeColeta = LocalDate.now();
+
     private String localDaColeta;
     private String tipoDeColeta;
     private String localAnatomico;
@@ -34,7 +39,8 @@ public class Amostra {
      * @param tipoDeColeta tipo de coleta realizada.
      * @param localAnatomico localização anatômica da coleta.
      */
-    public Amostra(String localDaColeta, String tipoDeColeta, String localAnatomico) {
+    public Amostra(int id,String localDaColeta, String tipoDeColeta, String localAnatomico) {
+        setId(id);
         setLocalDaColeta(localDaColeta);
         setTipoDeColeta(tipoDeColeta);
         setLocalAnatomico(localAnatomico);
@@ -46,6 +52,23 @@ public class Amostra {
 
     public String getLocalDaColeta() {
         return localDaColeta;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        try{
+            if (id > 0){
+                this.id = id;
+            }else{
+                throw new Exception("ID Invalido, deve ser maior que 0");
+            }
+
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(null, e, "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**

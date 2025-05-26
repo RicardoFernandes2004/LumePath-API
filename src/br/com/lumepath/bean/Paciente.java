@@ -18,7 +18,7 @@ import java.util.UUID;
  * @version 1.0
  */
 public class Paciente {
-    private final UUID id = UUID.randomUUID();
+    private int id;
     private String nome;
     private String cpf;
     private LocalDate dataDeNascimento;
@@ -35,7 +35,8 @@ public class Paciente {
      * @param codigoProntuario Código de prontuário do paciente.
      * @throws Exception Caso o CPF seja inválido ou a data de nascimento seja anterior a 01-01-1900.
      */
-    public Paciente(String nome, String cpf, String dataDeNascimento, String sexo, int codigoProntuario) throws Exception {
+    public Paciente(int id,String nome, String cpf, String dataDeNascimento, String sexo, int codigoProntuario) throws Exception {
+        setId(id);
         this.nome = nome;
         setCpf(cpf);
         setDataDeNascimento(dataDeNascimento);
@@ -43,6 +44,24 @@ public class Paciente {
         this.codigoProntuario = codigoProntuario;
     }
 
+
+
+    public void setId(int id) {
+        try{
+            if (id > 0){
+                this.id = id;
+            }else{
+                throw new Exception("ID Invalido, deve ser maior que 0");
+            }
+
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(null, e, "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public int getId(){
+        return id;
+    }
     public Paciente(){}
 
     public String getNome() {
@@ -116,7 +135,5 @@ public class Paciente {
         this.codigoProntuario = codigoProntuario;
     }
 
-    public UUID getId(){
-        return id;
-    }
+
 }
