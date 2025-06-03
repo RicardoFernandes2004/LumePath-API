@@ -3,7 +3,7 @@ package br.com.lumepath.bean;
 import javax.swing.*;
 
 /**
- * Implementação da interface {@link Sensor} para sensores baseados em tecnologia laser.
+ * Implementação da interface {@link ISensor} para sensores baseados em tecnologia laser.
  * <p>
  * Atualmente realiza a leitura mockada via JOptionPane.
  * <p>
@@ -14,7 +14,7 @@ import javax.swing.*;
  * @author Ricardo
  * @version 1.5
  */
-public class SensorLaser implements Sensor {
+public class SensorLaser implements ISensor {
 
     /** Porta serial utilizada para comunicação com o sensor. Ex.: COM3, /dev/ttyUSB0 */
     private String portaSerial;

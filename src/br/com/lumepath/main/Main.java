@@ -52,8 +52,8 @@ public class Main {
             Amostra amostra = new Amostra(idAmostra, localColeta, tipoColeta, localAnatomico);
 
             // Sensores e Leitores
-            Sensor sensorLaser = new SensorLaser("COM5");
-            Sensor sensorCamera = new SensorOpenCV("COM5");
+            ISensor sensorLaser = new SensorLaser("COM5");
+            ISensor sensorCamera = new SensorOpenCV("COM5");
 
             Leitor leitorLaser = new Leitor(sensorLaser, amostra);
             Leitor leitorCamera = new Leitor(sensorCamera, amostra);

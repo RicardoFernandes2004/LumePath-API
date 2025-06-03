@@ -16,7 +16,7 @@ package br.com.lumepath.bean;
  * @author Ricardo
  * @version 1.2
  */
-public interface Sensor {
+public interface ISensor {
 
     /**
      * Inicializa o sensor, preparando-o para operação.

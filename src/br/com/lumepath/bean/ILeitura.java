@@ -10,7 +10,7 @@ package br.com.lumepath.bean;
  * @author Ricardo
  * @version 1.0
  */
-public interface Leitura {
+public interface ILeitura {
 
     /**
      * Executa o ciclo de leitura de dados do sensor.

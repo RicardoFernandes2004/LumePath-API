@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.time.LocalDateTime;
 
 /**
- * Representa o componente responsável por realizar a leitura de dados do {@link Sensor},
+ * Representa o componente responsável por realizar a leitura de dados do {@link ISensor},
  * associando os resultados a uma {@link Amostra} e calculando a precisão com base na comparação
  * entre sensores de diferentes naturezas (e.g., laser vs. câmera).
  *
@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
  * @version 1.3
  */
 
-public class Leitor implements Leitura {
+public class Leitor implements ILeitura {
 
     /** Sensor associado ao leitor, responsável pela obtenção das medições. */
-    private final Sensor sensor;
+    private final ISensor sensor;
 
     /** Amostra associada ao leitor, que receberá os dados processados. */
     private final Amostra amostra;
@@ -40,7 +40,7 @@ public class Leitor implements Leitura {
     private double leituraCameraAltura;
     private double leituraCameraComprimento;
 
-    public Leitor(Sensor sensor, Amostra amostra) {
+    public Leitor(ISensor sensor, Amostra amostra) {
         this.sensor = sensor;
         this.amostra = amostra;
     }

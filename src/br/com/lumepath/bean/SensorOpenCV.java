@@ -3,7 +3,7 @@ package br.com.lumepath.bean;
 import javax.swing.*;
 
 /**
- * Implementação da interface {@link Sensor} para sensores de visão computacional.
+ * Implementação da interface {@link ISensor} para sensores de visão computacional.
  *
  * <p>Atualmente realiza leitura mockada via {@link JOptionPane} para simular
  * os dados obtidos por uma câmera, como altura e largura da amostra.</p>
@@ -13,7 +13,7 @@ import javax.swing.*;
  * @author Ricardo
  * @version 1.2
  */
-public class SensorOpenCV implements Sensor {
+public class SensorOpenCV implements ISensor {
 
     /** Porta serial utilizada para configuração e identificação do sensor. */
     private String portaSerial;
